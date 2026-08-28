@@ -109,7 +109,7 @@ internal/mcpserver/        MCP tool definitions, wrapping ghclient/tally
 
 ## Status
 
-`go build`, `go vet`, `gofmt`, and `go test ./...` run in CI on every push/PR to `main`. Unit tests cover the GitHub-remote parsing, bot matching, pagination/truncation, tally math, and TUI keybinding logic (`internal/config`, `internal/ghclient`, `internal/ghrepo`, `internal/tally`, `internal/tui` all have real coverage); the MCP tool wiring itself is thinner on unit tests but has been exercised live against a real repo.
+`go build`, `go vet`, `gofmt`, `go test ./...`, and `govulncheck` run in CI on every push/PR to `main`. Unit tests cover the GitHub-remote parsing, bot matching, pagination/truncation, tally math, and TUI keybinding logic (`internal/config`, `internal/ghclient`, `internal/ghrepo`, `internal/tally`, `internal/tui` all have real coverage); the MCP tool wiring itself is thinner on unit tests but has been exercised live against a real repo.
 
 ## License
 

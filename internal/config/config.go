@@ -11,8 +11,9 @@ type Config struct {
 	// RefreshInterval is how often the TUI auto-refreshes. Default 30s. Minimum 5s (Load returns an error below that).
 	RefreshInterval time.Duration
 	// BotLogin is matched (case-insensitive, exact) against a review thread's first-comment
-	// author login, or that login with a "[bot]" suffix, to decide it belongs to CodeRabbit.
-	// Default "coderabbitai".
+	// author login, or that login with a "[bot]" suffix, to decide which reviewer's threads
+	// are tracked. Default "coderabbitai". An empty string tracks every reviewer's threads
+	// (no author filtering) — useful on repos not using a specific bot.
 	BotLogin string
 	// PRLimit caps how many open PRs are fetched. Default 50.
 	PRLimit int
@@ -41,7 +42,7 @@ func Load(args []string) (Config, error) {
 
 	fs := flag.NewFlagSet("coderabbit-buddy", flag.ContinueOnError)
 	fs.DurationVar(&cfg.RefreshInterval, "refresh", cfg.RefreshInterval, "auto-refresh interval")
-	fs.StringVar(&cfg.BotLogin, "bot", cfg.BotLogin, "bot login to match (exact, or with a [bot] suffix)")
+	fs.StringVar(&cfg.BotLogin, "bot", cfg.BotLogin, "reviewer login to match (exact, or with a [bot] suffix); \"\" tracks every reviewer")
 	fs.IntVar(&cfg.PRLimit, "limit", cfg.PRLimit, "max open PRs to fetch")
 
 	if err := fs.Parse(args); err != nil {

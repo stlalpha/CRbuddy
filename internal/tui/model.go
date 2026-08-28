@@ -364,6 +364,7 @@ func fatalHint(err error) string {
 }
 
 func (m Model) View() string {
+	label := reviewerLabel(m.cfg.BotLogin)
 	switch m.state {
 	case stateChecking:
 		return fmt.Sprintf("%s checking environment…", m.spin.View())
@@ -376,7 +377,7 @@ func (m Model) View() string {
 		return errBox.Render(body + "\n\npress q to quit")
 
 	case stateLoading:
-		header := renderHeader(m.repo, tally.Tally{}, false, m.lastOK, true, m.spin.View(), m.width)
+		header := renderHeader(m.repo, tally.Tally{}, false, m.lastOK, true, m.spin.View(), label, m.width)
 		lines := []string{header, fmt.Sprintf("%s loading pull requests…", m.spin.View())}
 		return strings.Join(lines, "\n")
 
@@ -385,7 +386,7 @@ func (m Model) View() string {
 		if m.pending > 0 {
 			spin = m.spin.View()
 		}
-		header := renderHeader(m.repo, tally.Tally{}, false, m.lastOK, m.pending > 0, spin, m.width)
+		header := renderHeader(m.repo, tally.Tally{}, false, m.lastOK, m.pending > 0, spin, label, m.width)
 		body := m.lastErr.Error()
 		if hint := fatalHint(m.lastErr); hint != "" {
 			body = hint + "\n\n" + body
@@ -398,11 +399,11 @@ func (m Model) View() string {
 		if m.pending > 0 {
 			spin = m.spin.View()
 		}
-		header := renderHeader(m.repo, m.aggregate(), m.partial(), m.lastOK, m.pending > 0, spin, m.width)
+		header := renderHeader(m.repo, m.aggregate(), m.partial(), m.lastOK, m.pending > 0, spin, label, m.width)
 
 		if m.detail && m.cursor >= 0 && m.cursor < len(m.rows) {
 			row := m.rows[m.cursor]
-			lines := []string{header, "", renderThreadTable(row.pr, row.threads, m.threadCursor, m.width)}
+			lines := []string{header, "", renderThreadTable(row.pr, row.threads, m.threadCursor, label, m.width)}
 			if m.notice != "" {
 				lines = append(lines, errStyle.Render(m.notice))
 			} else {
@@ -413,7 +414,7 @@ func (m Model) View() string {
 
 		lines := []string{header}
 		for i, r := range m.rows {
-			lines = append(lines, renderRow(r, i == m.cursor, m.width))
+			lines = append(lines, renderRow(r, i == m.cursor, label, m.width))
 		}
 		if m.lastErr != nil {
 			lines = append(lines, errStyle.Render(m.lastErr.Error()))

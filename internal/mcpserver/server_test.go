@@ -65,7 +65,7 @@ func TestToTallyInfo(t *testing.T) {
 func TestToThreadInfo(t *testing.T) {
 	th := ghclient.Thread{IsResolved: true, IsOutdated: false, Path: "p", AuthorLogin: "coderabbitai", URL: "u", Body: "b"}
 	got := toThreadInfo(th)
-	want := threadInfo{IsResolved: true, IsOutdated: false, Path: "p", Body: "b", URL: "u"}
+	want := threadInfo{IsResolved: true, IsOutdated: false, Path: "p", Author: "coderabbitai", Body: "b", URL: "u"}
 	if got != want {
 		t.Errorf("toThreadInfo() = %+v, want %+v", got, want)
 	}

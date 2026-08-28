@@ -70,11 +70,12 @@ func toTallyInfo(t tally.Tally) tallyInfo {
 	return tallyInfo{Total: t.Total, Resolved: t.Resolved, Open: t.Open}
 }
 
-// threadInfo is the JSON shape for one CodeRabbit review thread.
+// threadInfo is the JSON shape for one review thread.
 type threadInfo struct {
 	IsResolved bool   `json:"is_resolved"`
 	IsOutdated bool   `json:"is_outdated"`
 	Path       string `json:"path"`
+	Author     string `json:"author"`
 	Body       string `json:"body"`
 	URL        string `json:"url"`
 }
@@ -84,6 +85,7 @@ func toThreadInfo(t ghclient.Thread) threadInfo {
 		IsResolved: t.IsResolved,
 		IsOutdated: t.IsOutdated,
 		Path:       t.Path,
+		Author:     t.AuthorLogin,
 		Body:       t.Body,
 		URL:        t.URL,
 	}
@@ -124,7 +126,7 @@ type repoReviewTallyOut struct {
 // prReviewCommentsIn is the input for the get_pr_review_comments tool.
 type prReviewCommentsIn struct {
 	Dir      string `json:"dir,omitempty" jsonschema:"directory inside the git repo to inspect; defaults to the server's working directory"`
-	PRNumber int    `json:"pr_number" jsonschema:"the pull request number to fetch CodeRabbit comments for"`
+	PRNumber int    `json:"pr_number" jsonschema:"the pull request number to fetch review comments for"`
 }
 
 // prReviewCommentsOut is the output for the get_pr_review_comments tool.
@@ -169,7 +171,7 @@ func New(client *ghclient.Client, cfg config.Config) *mcp.Server {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_repo_review_tally",
-		Description: "Get the CodeRabbit review-comment tally (total/resolved/open) per open PR and in aggregate, for the GitHub repo at the given directory (or the server's cwd if omitted).",
+		Description: "Get the review-comment tally (total/resolved/open) per open PR and in aggregate, for the GitHub repo at the given directory (or the server's cwd if omitted). Tracks the configured reviewer login (CodeRabbit by default), or every reviewer if the server was started with an empty -bot.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in repoReviewTallyIn) (*mcp.CallToolResult, repoReviewTallyOut, error) {
 		ctx, cancel := context.WithTimeout(ctx, cmdTimeout)
 		defer cancel()
@@ -209,7 +211,7 @@ func New(client *ghclient.Client, cfg config.Config) *mcp.Server {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_pr_review_comments",
-		Description: "Get every CodeRabbit review comment thread (resolved or open, with file path, body, and URL) on one pull request, for the GitHub repo at the given directory (or the server's cwd if omitted).",
+		Description: "Get every matching review comment thread (resolved or open, with author, file path, body, and URL) on one pull request, for the GitHub repo at the given directory (or the server's cwd if omitted). Tracks the configured reviewer login (CodeRabbit by default), or every reviewer if the server was started with an empty -bot.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in prReviewCommentsIn) (*mcp.CallToolResult, prReviewCommentsOut, error) {
 		ctx, cancel := context.WithTimeout(ctx, cmdTimeout)
 		defer cancel()

@@ -11,7 +11,8 @@ import (
 	"github.com/stlalpha/CRbuddy/internal/ghrepo"
 )
 
-// Thread is one review thread whose first comment was authored by the bot.
+// Thread is one review thread matching the requested author filter (a
+// specific bot/user login, or every reviewer when botLogin is "").
 type Thread struct {
 	IsResolved  bool
 	IsOutdated  bool
@@ -113,11 +114,15 @@ const (
 	perPageTimeout = 15 * time.Second
 )
 
-// ReviewThreads returns every review thread on the PR whose FIRST comment's author login,
-// lowercased, exactly matches botLogin or botLogin+"[bot]" (also lowercased).
+// ReviewThreads returns review threads on the PR, filtered by each thread's FIRST
+// comment author. When botLogin is non-empty, only threads whose first comment's
+// author login, lowercased, exactly matches botLogin or botLogin+"[bot]" (also
+// lowercased) are included. When botLogin is "", every reviewer's threads are
+// included (no author filtering) — useful for repos not using a specific bot.
 func (c *Client) ReviewThreads(ctx context.Context, repo ghrepo.Repo, number int, botLogin string) (ReviewThreadsResult, error) {
 	botLoginLower := strings.ToLower(botLogin)
 	botAppLoginLower := botLoginLower + "[bot]"
+	matchAll := botLoginLower == ""
 
 	result := ReviewThreadsResult{Threads: make([]Thread, 0)}
 
@@ -163,7 +168,7 @@ func (c *Client) ReviewThreads(ctx context.Context, repo ghrepo.Repo, number int
 				continue
 			}
 			login := strings.ToLower(first.Author.Login)
-			if login != botLoginLower && login != botAppLoginLower {
+			if !matchAll && login != botLoginLower && login != botAppLoginLower {
 				continue
 			}
 			result.Threads = append(result.Threads, Thread{

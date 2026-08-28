@@ -33,6 +33,16 @@ func TestLoad_Overrides(t *testing.T) {
 	}
 }
 
+func TestLoad_EmptyBotMeansAllReviewers(t *testing.T) {
+	cfg, err := Load([]string{"-bot", ""})
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if cfg.BotLogin != "" {
+		t.Errorf("BotLogin = %q, want empty (all reviewers)", cfg.BotLogin)
+	}
+}
+
 func TestLoad_RefreshBelowMinimum(t *testing.T) {
 	if _, err := Load([]string{"-refresh", "1s"}); err == nil {
 		t.Fatal("Load() with -refresh 1s: want an error, got nil")

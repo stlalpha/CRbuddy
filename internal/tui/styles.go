@@ -76,7 +76,21 @@ func formatUpdated(t time.Time) string {
 	}
 }
 
-func renderRow(r prRow, selected bool, width int) string {
+// reviewerLabel returns the display name for the configured reviewer filter:
+// "CodeRabbit" for the default bot login, "Reviews" when tracking every
+// reviewer (botLogin == ""), or the literal login otherwise.
+func reviewerLabel(botLogin string) string {
+	switch {
+	case botLogin == "":
+		return "Reviews"
+	case strings.EqualFold(botLogin, "coderabbitai"):
+		return "CodeRabbit"
+	default:
+		return botLogin
+	}
+}
+
+func renderRow(r prRow, selected bool, label string, width int) string {
 	prNum := fmt.Sprintf("#%d", r.pr.Number)
 	titleWidth := titleColWidth(width)
 
@@ -116,7 +130,7 @@ func renderRow(r prRow, selected bool, width int) string {
 	}
 
 	if r.tally.Total == 0 {
-		return base + "  " + dimStyle.Render("no coderabbit threads") + warn
+		return base + "  " + dimStyle.Render(fmt.Sprintf("%s: none", label)) + warn
 	}
 
 	if r.tally.Done() {
@@ -135,7 +149,7 @@ func renderRow(r prRow, selected bool, width int) string {
 	return base
 }
 
-func renderHeader(repo ghrepo.Repo, agg tally.Tally, partial bool, lastOK time.Time, refreshing bool, spin string, width int) string {
+func renderHeader(repo ghrepo.Repo, agg tally.Tally, partial bool, lastOK time.Time, refreshing bool, spin string, label string, width int) string {
 	line1 := titleStyle.Render(repo.Slug())
 	if refreshing {
 		line1 += " " + spin
@@ -143,9 +157,9 @@ func renderHeader(repo ghrepo.Repo, agg tally.Tally, partial bool, lastOK time.T
 
 	var aggStr string
 	if agg.Total == 0 {
-		aggStr = "CodeRabbit: no threads"
+		aggStr = label + ": no threads"
 	} else {
-		aggStr = fmt.Sprintf("CodeRabbit: %s open / %s resolved / %d total",
+		aggStr = fmt.Sprintf("%s: %s open / %s resolved / %d total", label,
 			openStyle.Render(fmt.Sprintf("%d", agg.Open)),
 			resolvedStyle.Render(fmt.Sprintf("%d", agg.Resolved)),
 			agg.Total)
@@ -192,7 +206,7 @@ const (
 // threadCommentColWidth returns how wide the comment-preview column should be
 // for a given terminal width, leaving room for the other fixed-width columns.
 func threadCommentColWidth(width int) int {
-	reserved := threadCursorColWidth + statusColWidth + pathColWidth + colGap*3
+	reserved := threadCursorColWidth + statusColWidth + authorColWidth + pathColWidth + colGap*4
 	w := width - reserved
 	if w < 15 {
 		w = 15
@@ -200,21 +214,23 @@ func threadCommentColWidth(width int) int {
 	return w
 }
 
-// renderThreadTable renders the detail view for one PR: every CodeRabbit
-// thread on it (both resolved and open), with a clear status indicator,
-// file path, and a truncated comment preview. cursor selects a row for the
-// "o" (open in browser) keybinding.
-func renderThreadTable(pr ghclient.PR, threads []ghclient.Thread, cursor int, width int) string {
+// renderThreadTable renders the detail view for one PR: every matching review
+// thread on it (both resolved and open, from whichever reviewer(s) are
+// configured), with a clear status indicator, author, file path, and a
+// truncated comment preview. cursor selects a row for the "o" (open in
+// browser) keybinding.
+func renderThreadTable(pr ghclient.PR, threads []ghclient.Thread, cursor int, label string, width int) string {
 	title := titleStyle.Render(fmt.Sprintf("#%d — %s", pr.Number, pr.Title))
 
 	if len(threads) == 0 {
-		return title + "\n\n" + dimStyle.Render("no CodeRabbit threads on this PR")
+		return title + "\n\n" + dimStyle.Render(fmt.Sprintf("no %s threads on this PR", label))
 	}
 
 	commentWidth := threadCommentColWidth(width)
 	header := padCol("", threadCursorColWidth) + strings.Repeat(" ", colGap) +
 		strings.Join([]string{
 			padCol("STATUS", statusColWidth),
+			padCol("AUTHOR", authorColWidth),
 			padCol("PATH", pathColWidth),
 			padCol("COMMENT", commentWidth),
 		}, strings.Repeat(" ", colGap))
@@ -233,6 +249,12 @@ func renderThreadTable(pr ghclient.PR, threads []ghclient.Thread, cursor int, wi
 			statusCol = openStyle.Render(padCol("● open", statusColWidth))
 		}
 
+		author := t.AuthorLogin
+		if author == "" {
+			author = "?"
+		}
+		authorCol := padCol(author, authorColWidth)
+
 		path := t.Path
 		if path == "" {
 			path = "(file-level)"
@@ -240,7 +262,7 @@ func renderThreadTable(pr ghclient.PR, threads []ghclient.Thread, cursor int, wi
 		pathCol := padCol(path, pathColWidth)
 		commentCol := padCol(strings.ReplaceAll(t.Body, "\n", " "), commentWidth)
 
-		row := mark + strings.Repeat(" ", colGap) + strings.Join([]string{statusCol, pathCol, commentCol}, strings.Repeat(" ", colGap))
+		row := mark + strings.Repeat(" ", colGap) + strings.Join([]string{statusCol, authorCol, pathCol, commentCol}, strings.Repeat(" ", colGap))
 		lines = append(lines, row)
 	}
 

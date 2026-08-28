@@ -1,8 +1,11 @@
 package tui
 
 import (
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/stlalpha/CRbuddy/internal/ghclient"
 )
 
 func TestTruncate(t *testing.T) {
@@ -60,11 +63,49 @@ func TestTitleColWidth(t *testing.T) {
 }
 
 func TestThreadCommentColWidth(t *testing.T) {
-	reserved := threadCursorColWidth + statusColWidth + pathColWidth + colGap*3
+	reserved := threadCursorColWidth + statusColWidth + authorColWidth + pathColWidth + colGap*4
 	if got, want := threadCommentColWidth(reserved+50), 50; got != want {
 		t.Errorf("threadCommentColWidth(reserved+50) = %d, want %d", got, want)
 	}
 	if got := threadCommentColWidth(reserved - 100); got != 15 {
 		t.Errorf("threadCommentColWidth(too narrow) = %d, want floor of 15", got)
+	}
+}
+
+func TestReviewerLabel(t *testing.T) {
+	cases := []struct {
+		botLogin string
+		want     string
+	}{
+		{"coderabbitai", "CodeRabbit"},
+		{"CodeRabbitAI", "CodeRabbit"},
+		{"", "Reviews"},
+		{"alice", "alice"},
+	}
+	for _, c := range cases {
+		if got := reviewerLabel(c.botLogin); got != c.want {
+			t.Errorf("reviewerLabel(%q) = %q, want %q", c.botLogin, got, c.want)
+		}
+	}
+}
+
+func TestRenderThreadTable_ShowsAuthorAndHandlesEmpty(t *testing.T) {
+	pr := ghclient.PR{Number: 1, Title: "t"}
+
+	empty := renderThreadTable(pr, nil, 0, "Reviews", 120)
+	if !strings.Contains(empty, "no Reviews threads on this PR") {
+		t.Errorf("empty table = %q, want it to mention no Reviews threads", empty)
+	}
+
+	threads := []ghclient.Thread{
+		{IsResolved: true, AuthorLogin: "alice", Path: "a.go", Body: "looks good"},
+		{IsResolved: false, AuthorLogin: "coderabbitai", Path: "b.go", Body: "fix this"},
+	}
+	out := renderThreadTable(pr, threads, 0, "Reviews", 120)
+	if !strings.Contains(out, "alice") {
+		t.Errorf("table output missing author %q:\n%s", "alice", out)
+	}
+	if !strings.Contains(out, "coderabbitai") {
+		t.Errorf("table output missing author %q:\n%s", "coderabbitai", out)
 	}
 }

@@ -86,6 +86,43 @@ func TestReviewThreads_BotMatching(t *testing.T) {
 	}
 }
 
+func TestReviewThreads_AllReviewersMode(t *testing.T) {
+	nodes := []threadNode{
+		{path: "a.go", hasComment: true, hasAuthor: true, authorLogin: "coderabbitai", url: "u1", body: "b1"},
+		{path: "b.go", hasComment: true, hasAuthor: true, authorLogin: "alice", url: "u2", body: "b2"},
+		{path: "c.go", hasComment: true, hasAuthor: true, authorLogin: "bob", url: "u3", body: "b3"},
+		{path: "no-comments.go", hasComment: false},
+		{path: "nil-author.go", hasComment: true, hasAuthor: false},
+	}
+	c := &Client{Runner: &fakeRunner{
+		RunFunc: func(ctx context.Context, name string, args ...string) ([]byte, error) {
+			return []byte(threadsPage(nodes, false, "")), nil
+		},
+	}}
+
+	// Empty botLogin means "every reviewer" — no author filtering.
+	result, err := c.ReviewThreads(context.Background(), ghrepo.Repo{Owner: "o", Name: "r"}, 1, "")
+	if err != nil {
+		t.Fatalf("ReviewThreads() error = %v", err)
+	}
+	if len(result.Threads) != 3 {
+		t.Fatalf("len(Threads) = %d, want 3 (coderabbitai, alice, bob all included)", len(result.Threads))
+	}
+	gotAuthors := map[string]bool{}
+	for _, th := range result.Threads {
+		gotAuthors[th.AuthorLogin] = true
+	}
+	for _, want := range []string{"coderabbitai", "alice", "bob"} {
+		if !gotAuthors[want] {
+			t.Errorf("Threads missing author %q, got %+v", want, result.Threads)
+		}
+	}
+	// Threads with no determinable author are still ambiguous, even in "all" mode.
+	if result.Ambiguous != 2 {
+		t.Errorf("Ambiguous = %d, want 2", result.Ambiguous)
+	}
+}
+
 func TestReviewThreads_Ambiguous(t *testing.T) {
 	nodes := []threadNode{
 		{path: "no-comments.go", hasComment: false},

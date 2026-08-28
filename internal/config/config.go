@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Config holds runtime settings for coderabbit-buddy.
+// Config holds runtime settings for prpal.
 type Config struct {
 	// RefreshInterval is how often the TUI auto-refreshes. Default 30s. Minimum 5s (Load returns an error below that).
 	RefreshInterval time.Duration
@@ -28,7 +28,7 @@ func Default() Config {
 	}
 }
 
-// Load parses args (os.Args[1:]) with a flag.NewFlagSet("coderabbit-buddy", flag.ContinueOnError):
+// Load parses args (os.Args[1:]) with a flag.NewFlagSet("prpal", flag.ContinueOnError):
 //
 //	-refresh duration  (default 30s)  e.g. -refresh 1m
 //	-bot string        (default "coderabbitai")
@@ -40,7 +40,7 @@ func Default() Config {
 func Load(args []string) (Config, error) {
 	cfg := Default()
 
-	fs := flag.NewFlagSet("coderabbit-buddy", flag.ContinueOnError)
+	fs := flag.NewFlagSet("prpal", flag.ContinueOnError)
 	fs.DurationVar(&cfg.RefreshInterval, "refresh", cfg.RefreshInterval, "auto-refresh interval")
 	fs.StringVar(&cfg.BotLogin, "bot", cfg.BotLogin, "reviewer login to match (exact, or with a [bot] suffix); \"\" tracks every reviewer")
 	fs.IntVar(&cfg.PRLimit, "limit", cfg.PRLimit, "max open PRs to fetch")

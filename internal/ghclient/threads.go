@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/ghrepo"
 )
 
 // Thread is one review thread matching the requested author filter (a

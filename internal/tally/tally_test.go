@@ -3,7 +3,7 @@ package tally
 import (
 	"testing"
 
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/ghclient"
 )
 
 func TestCount(t *testing.T) {

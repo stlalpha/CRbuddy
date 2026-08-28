@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/ghrepo"
 )
 
 func TestListOpenPRs_Success(t *testing.T) {

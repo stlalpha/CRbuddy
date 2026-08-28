@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/ghrepo"
 )
 
 // threadsPage builds one page of the threadsQuery response JSON.

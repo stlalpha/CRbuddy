@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/ghrepo"
 )
 
 // PR is one open pull request.

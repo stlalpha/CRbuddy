@@ -39,5 +39,5 @@ internal/mcpserver/        MCP tool definitions, wrapping ghclient/tally
 ## Gotchas
 
 - No `LICENSE`-adjacent secrets or tokens live in this repo — auth is entirely delegated to the user's own `gh auth login` session. Never add a hardcoded token, and never suggest committing one for "convenience."
-- The module is `github.com/stlalpha/CRbuddy`; `go.mod` pins a `toolchain` line (currently `go1.25.13`) specifically to stay ahead of known stdlib CVEs — don't remove it without checking `govulncheck ./...` still passes on whatever toolchain replaces it.
+- The module is `github.com/stlalpha/prpal`; `go.mod` pins a `toolchain` line (currently `go1.25.13`) specifically to stay ahead of known stdlib CVEs — don't remove it without checking `govulncheck ./...` still passes on whatever toolchain replaces it.
 - There's no `CLAUDE.md` in this repo on purpose (it's gitignored) — personal assistant instructions aren't checked in here. This file is the one meant for any agent working in this codebase, Claude or otherwise.

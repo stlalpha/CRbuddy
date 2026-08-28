@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/ghrepo"
 )
 
 // preflightMsg carries the result of startup checks. Exactly one of repo/err is meaningful.

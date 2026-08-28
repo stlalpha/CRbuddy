@@ -1,4 +1,4 @@
-module github.com/stlalpha/CRbuddy
+module github.com/stlalpha/prpal
 
 go 1.25.1
 

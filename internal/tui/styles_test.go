@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/ghclient"
 )
 
 func TestTruncate(t *testing.T) {

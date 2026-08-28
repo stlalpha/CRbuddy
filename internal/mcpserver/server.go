@@ -1,4 +1,4 @@
-// Package mcpserver exposes CodeRabbit Buddy's PR and review-tally data as
+// Package mcpserver exposes PRpal's PR and review-tally data as
 // MCP tools over stdio, so an agent can query a repo's review status without
 // going through the interactive TUI. It is a read-only wrapper around
 // internal/ghclient and internal/tally — no GitHub-fetching or tally logic
@@ -13,10 +13,10 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/stlalpha/CRbuddy/internal/config"
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
-	"github.com/stlalpha/CRbuddy/internal/tally"
+	"github.com/stlalpha/prpal/internal/config"
+	"github.com/stlalpha/prpal/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/tally"
 )
 
 // cmdTimeout bounds every gh invocation a tool call makes, matching the TUI's
@@ -141,7 +141,7 @@ type prReviewCommentsOut struct {
 // New builds an MCP server exposing client's PR/review data as read-only
 // tools, using cfg for the default bot login and PR fetch limit.
 func New(client *ghclient.Client, cfg config.Config) *mcp.Server {
-	server := mcp.NewServer(&mcp.Implementation{Name: "coderabbit-buddy", Version: "0.1.0"}, nil)
+	server := mcp.NewServer(&mcp.Implementation{Name: "prpal", Version: "0.1.0"}, nil)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_open_prs",

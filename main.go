@@ -6,10 +6,10 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/stlalpha/CRbuddy/internal/config"
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
-	"github.com/stlalpha/CRbuddy/internal/mcpserver"
-	"github.com/stlalpha/CRbuddy/internal/tui"
+	"github.com/stlalpha/prpal/internal/config"
+	"github.com/stlalpha/prpal/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/mcpserver"
+	"github.com/stlalpha/prpal/internal/tui"
 )
 
 func main() {

@@ -1,6 +1,6 @@
-# CodeRabbit Buddy
+# PRpal
 
-[![CI](https://github.com/stlalpha/CRbuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/stlalpha/CRbuddy/actions/workflows/ci.yml)
+[![CI](https://github.com/stlalpha/prpal/actions/workflows/ci.yml/badge.svg)](https://github.com/stlalpha/prpal/actions/workflows/ci.yml)
 
 A terminal companion that runs in a separate window while you work in a GitHub repo. It shows your open pull requests and a running tally of review comments (resolved vs. open), auto-refreshing in the background. It also exposes the same data as MCP tools, so an agent can query it directly.
 
@@ -15,15 +15,15 @@ By default it tracks CodeRabbit's comments specifically, but it isn't CodeRabbit
 ## Install
 
 ```bash
-go install github.com/stlalpha/CRbuddy@latest
+go install github.com/stlalpha/prpal@latest
 ```
 
 Or build from a clone:
 
 ```bash
-git clone https://github.com/stlalpha/CRbuddy.git
-cd CRbuddy
-go build -o coderabbit-buddy .
+git clone https://github.com/stlalpha/prpal.git
+cd prpal
+go build -o prpal .
 ```
 
 ## TUI
@@ -31,7 +31,7 @@ go build -o coderabbit-buddy .
 Run it from inside the repo you want to watch:
 
 ```bash
-coderabbit-buddy
+prpal
 ```
 
 On startup it detects the repo from your git remote (`origin`, falling back to any other remote that parses as a GitHub URL), checks that `gh` is installed and authenticated, then lists open PRs and fetches each one's review threads via `gh api graphql`. By default, only threads whose first comment's author login exactly matches `-bot` (or that login with a `[bot]` suffix — not a substring match) are tracked; pass `-bot ""` to track every reviewer's threads with no filtering. A thread counts as resolved only when GitHub reports its review thread as resolved.
@@ -60,7 +60,7 @@ The PR list shows number, title, author, last-updated time, and a per-PR tally (
 ## MCP server
 
 ```bash
-coderabbit-buddy mcp
+prpal mcp
 ```
 
 Starts an MCP server over stdio instead of the TUI. It's read-only and reuses the same repo-detection, PR-fetching, and tally logic as the TUI. `-bot` and `-limit` apply here too; `-refresh` does not (tools are called on demand, not polled).
@@ -68,7 +68,7 @@ Starts an MCP server over stdio instead of the TUI. It's read-only and reuses th
 Register it with Claude Code:
 
 ```bash
-claude mcp add coderabbit-buddy -- /path/to/coderabbit-buddy mcp
+claude mcp add prpal -- /path/to/prpal mcp
 ```
 
 ### Tools
@@ -79,7 +79,7 @@ claude mcp add coderabbit-buddy -- /path/to/coderabbit-buddy mcp
 | `get_repo_review_tally` | `dir` (optional) | `{ repo, aggregate: { total, resolved, open }, prs: [{ number, title, tally, truncated?, ambiguous? }] }` |
 | `get_pr_review_comments` | `dir` (optional), `pr_number` | `{ repo, pr_number, threads: [{ is_resolved, is_outdated, path, author, body, url }], truncated?, ambiguous? }` |
 
-`dir` resolves the repo the same way the TUI does (git remote detection from that directory); it does not accept an `owner/repo` string directly. Which reviewer(s) get tracked is set once, at server startup, via the same `-bot` flag as the TUI (`coderabbit-buddy mcp -bot ""` tracks every reviewer) — it isn't a per-call parameter. Errors (not a git repo, `gh` not authenticated, PR not found) come back as normal MCP tool errors, not crashes.
+`dir` resolves the repo the same way the TUI does (git remote detection from that directory); it does not accept an `owner/repo` string directly. Which reviewer(s) get tracked is set once, at server startup, via the same `-bot` flag as the TUI (`prpal mcp -bot ""` tracks every reviewer) — it isn't a per-call parameter. Errors (not a git repo, `gh` not authenticated, PR not found) come back as normal MCP tool errors, not crashes.
 
 ## Troubleshooting
 
@@ -89,7 +89,7 @@ claude mcp add coderabbit-buddy -- /path/to/coderabbit-buddy mcp
 
 **"gh: Could not resolve to a PullRequest with the number of N".** Either the PR number doesn't exist in the detected repo, or you don't have access to it (private repo, no permission). The tool prints the repo slug it resolved (in the TUI header, or the `repo` field in an MCP tool's output) — confirm that's the repo you meant.
 
-**A PR shows `⚠ truncated` or `⚠ N ambiguous`.** Truncated means the PR has more than 2000 review comment threads (the pagination cap); the tally is a lower bound. Ambiguous means some threads had no readable first-comment author and couldn't be attributed to CodeRabbit or anyone else; they're excluded from the tally rather than guessed at.
+**A PR shows `⚠ truncated` or `⚠ N ambiguous`.** Truncated means the PR has more than 2000 review comment threads (the pagination cap); the tally is a lower bound. Ambiguous means some threads had no readable first-comment author and couldn't be attributed to anyone; they're excluded from the tally rather than guessed at.
 
 **Nothing happens on a large repo, or it's slow.** Each open PR is a separate `gh api graphql` call; a repo with many open PRs means many sequential calls per refresh. Lower `-limit` to fetch fewer PRs, or raise `-refresh` to poll less often.
 

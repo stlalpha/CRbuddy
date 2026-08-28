@@ -11,10 +11,10 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/stlalpha/CRbuddy/internal/config"
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
-	"github.com/stlalpha/CRbuddy/internal/ghrepo"
-	"github.com/stlalpha/CRbuddy/internal/tally"
+	"github.com/stlalpha/prpal/internal/config"
+	"github.com/stlalpha/prpal/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/ghrepo"
+	"github.com/stlalpha/prpal/internal/tally"
 )
 
 // state enumerates the top-level UI mode.

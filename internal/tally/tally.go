@@ -1,6 +1,6 @@
 package tally
 
-import "github.com/stlalpha/CRbuddy/internal/ghclient"
+import "github.com/stlalpha/prpal/internal/ghclient"
 
 // Tally counts CodeRabbit review threads.
 type Tally struct {

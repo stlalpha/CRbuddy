@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stlalpha/CRbuddy/internal/ghclient"
-	"github.com/stlalpha/CRbuddy/internal/tally"
+	"github.com/stlalpha/prpal/internal/ghclient"
+	"github.com/stlalpha/prpal/internal/tally"
 )
 
 func TestResolveRepo_ExplicitDir(t *testing.T) {
